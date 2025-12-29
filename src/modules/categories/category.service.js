@@ -15,7 +15,6 @@ export const createCategoryService = async (payload) => {
 
 export const updateCategoryService = async (payload) => {
     const { id, name, description } = payload
-    console.log(payload)
     const { exists } = await findCategoryByNameModel({ name })
     if (exists) {
         const error = new Error("Tên này đã tồn tại, vui lòng đổi tên khác")

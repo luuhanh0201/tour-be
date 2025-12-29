@@ -1,3 +1,4 @@
+import { validatePayload } from "../../utils/validatePayload.until.js";
 import { hashToken, signAccessToken, signRefreshToken, verifyRefreshToken } from "../../utils/token.until.js";
 import { createAccessTokenModel, findRefreshTokenHashModel, revokeSessionByRefreshTokenHashModel, updateRefreshTokenModel } from "./auth.model.js";
 import { signInService, signUpService } from "./auth.service.js";
@@ -8,18 +9,12 @@ const REFRESH_DAYS = 7
 const addDays = (days) => new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 export const signIn = async (req, res, next) => {
     try {
-
         const { body, ip } = req
         const userAgent = req.get("user-agent");
-        const { error } = signInValid.validate(body, { abortEarly: false })
+        const error = validatePayload(signInValid, body)
         if (error) {
-            const errors = error.details.reduce((acc, cur) => {
-                acc[cur.path[0]] = cur.message;
-                return acc;
-            }, {});
-            return res.status(400).json({ errors });
+            return res.status(400).json(error)
         }
-
         const user = await signInService(body)
         const { id } = user
         const accessToken = signAccessToken({ id: user.id, username: user.username, role: user.role })
@@ -40,14 +35,9 @@ export const signIn = async (req, res, next) => {
 export const signUp = async (req, res, next) => {
     try {
         const payload = req.body;
-        const { error } = signUpValid.validate(payload)
+        const error = validatePayload(signUpValid, payload)
         if (error) {
-            const errors = error.details.reduce((acc, cur) => {
-                acc[cur.path[0]] = cur.message;
-                return acc;
-
-            }, {})
-            return res.status(400).json({ errors });
+            return res.status(400).json(error)
         }
         const user = await signUpService(payload);
 

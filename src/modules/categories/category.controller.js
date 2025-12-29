@@ -1,3 +1,4 @@
+import { validatePayload } from "../../utils/validatePayload.until.js"
 import { findCategoryByNameModel, getAllCategoryModel } from "./category.model.js"
 import { createCategoryService, deleteCategoryService, updateCategoryService } from "./category.service.js"
 import { categoryValid, queryValid } from "./category.validation.js"
@@ -27,13 +28,9 @@ export const getALlCategoryController = async (req, res, next) => {
 }
 export const createCategoryController = async (req, res, next) => {
     try {
-        const { error } = categoryValid.validate(req.body, { abortEarly: false })
+        const error = validatePayload(categoryValid, req.body)
         if (error) {
-            const errors = error.details.reduce((acc, cur) => {
-                acc[cur.path[0]] = cur.message
-                return acc
-            }, {})
-            return res.status(400).json({ errors })
+            return res.status(400).json(error)
         }
         const cate = await createCategoryService(req.body)
         return res.status(200).json({
@@ -47,13 +44,9 @@ export const createCategoryController = async (req, res, next) => {
 
 export const updateCategoryController = async (req, res, next) => {
     try {
-        const { error } = categoryValid.validate(req.body, { abortEarly: false })
+        const error = validatePayload(categoryValid, req.body)
         if (error) {
-            const errors = error.details.reduce((acc, cur) => {
-                acc[cur.path[0]] = cur.message
-                return acc
-            }, {})
-            return res.status(400).json({ errors })
+            return res.status(400).json(error)
         }
         const payload = {
             ...req.body, id: req.params.id,

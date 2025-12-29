@@ -4,7 +4,7 @@ import crypto from "crypto";
 dotenv.config()
 
 export const signAccessToken = (payload) => {
-    return jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: "30m" })
+    return jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: "6d" })
 }
 
 export const signRefreshToken = (payload) => {
