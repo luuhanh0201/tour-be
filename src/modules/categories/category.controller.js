@@ -28,9 +28,9 @@ export const getALlCategoryController = async (req, res, next) => {
 }
 export const createCategoryController = async (req, res, next) => {
     try {
-        const error = validatePayload(categoryValid, req.body)
-        if (error) {
-            return res.status(400).json(error)
+        const { errors } = validatePayload(categoryValid, req.body)
+        if (errors) {
+            return res.status(400).json(errors)
         }
         const cate = await createCategoryService(req.body)
         return res.status(200).json({
@@ -44,9 +44,9 @@ export const createCategoryController = async (req, res, next) => {
 
 export const updateCategoryController = async (req, res, next) => {
     try {
-        const error = validatePayload(categoryValid, req.body)
-        if (error) {
-            return res.status(400).json(error)
+        const {errors} = validatePayload(categoryValid, req.body)
+        if (errors) {
+            return res.status(400).json(errors)
         }
         const payload = {
             ...req.body, id: req.params.id,

@@ -11,9 +11,9 @@ export const signIn = async (req, res, next) => {
     try {
         const { body, ip } = req
         const userAgent = req.get("user-agent");
-        const error = validatePayload(signInValid, body)
-        if (error) {
-            return res.status(400).json(error)
+        const {errors} = validatePayload(signInValid, body)
+        if (errors) {
+            return res.status(400).json(errors)
         }
         const user = await signInService(body)
         const { id } = user
@@ -35,9 +35,9 @@ export const signIn = async (req, res, next) => {
 export const signUp = async (req, res, next) => {
     try {
         const payload = req.body;
-        const error = validatePayload(signUpValid, payload)
-        if (error) {
-            return res.status(400).json(error)
+        const {errors} = validatePayload(signUpValid, payload)
+        if (errors) {
+            return res.status(400).json(errors)
         }
         const user = await signUpService(payload);
 
