@@ -1,7 +1,7 @@
 import { validatePayload } from "../../utils/validatePayload.until.js"
 import { queryValid } from "../categories/category.validation.js"
-import { adminUpdateUserService, findAllUserService, findUserByIdService } from "./user.service.js"
-import { userUpdateValid } from "./user.validate.js"
+import { adminUpdateUserService, findAllUserService, findUserByIdService, guideUpdateProfileService } from "./user.service.js"
+import { profileValid, userUpdateValid } from "./user.validate.js"
 
 export const findAllUserController = async (req, res, next) => {
     try {
@@ -26,6 +26,7 @@ export const findUserByIdController = async (req, res, next) => {
 }
 export const adminUpdateUserController = async (req, res, next) => {
     try {
+        console.log(1)
         const adminCurrent = req.user
         const userId = req.params.id
         const { errors, value } = validatePayload(userUpdateValid, req.body)
@@ -36,6 +37,18 @@ export const adminUpdateUserController = async (req, res, next) => {
             message: "Cập nhật thành công",
             updated
         })
+    } catch (error) {
+        next(error)
+    }
+}
+export const guideUpdateProfileController = async (req, res, next) => {
+    try {
+        const user = req.user
+        const payload = req.body
+        const { errors, value } = validatePayload(profileValid, payload)
+        if (errors) return res.status(400).json(errors)
+        const newProfile = await guideUpdateProfileService(user, value)
+        return res.status(200).json({ message: "Cập nhật thành công", newProfile })
     } catch (error) {
         next(error)
     }

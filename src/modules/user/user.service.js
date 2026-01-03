@@ -1,5 +1,5 @@
 import { findUserByIdModel, findUsernameModel } from "../auth/auth.model.js"
-import { adminUpdateUserModel, findAllUserModel, getUserWithProfileByIdModel } from "./user.model.js"
+import { adminUpdateUserModel, findAllUserModel, getUserWithProfileByIdModel, guideUpdateProfileModel } from "./user.model.js"
 
 export const findAllUserService = async (payload = {}) => {
     const { q = "", limit = 10, page = 1 } = payload
@@ -55,3 +55,21 @@ export const adminUpdateUserService = async (admin, payload) => {
     const { userProfile } = await getUserWithProfileByIdModel(userId)
     return userProfile
 }
+export const guideUpdateProfileService = async (user, payload) => {
+    if (!user) {
+        const error = new Error("Người dùng không tồn tại.")
+        error.name = "USER_ERROR"
+        error.status = 409
+        throw error
+    }
+    const { id } = user
+    const profileUpdated = await guideUpdateProfileModel({ ...payload, userId: id })
+    if (!profileUpdated) {
+        const error = new Error("Cập nhật thất bại.")
+        error.name = "USER_ERROR"
+        error.status = 409
+        throw error
+    }
+    const newUser = await getUserWithProfileByIdModel(id)
+    return newUser
+}   

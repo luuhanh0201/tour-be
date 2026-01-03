@@ -1,4 +1,5 @@
 import { poolConnection } from "../../config/database.js";
+import { isBlockOrNull, setRoleOrNull, trimOrNull } from "../../utils/formatterValue.until.js";
 
 export const findAllUserModel = async ({ page = 1, limit = 10, q = "" } = {}) => {
     try {
@@ -31,21 +32,10 @@ export const findAllUserModel = async ({ page = 1, limit = 10, q = "" } = {}) =>
 
 export const adminUpdateUserModel = async (payload = {}) => {
     const conn = await poolConnection.getConnection();
-
     try {
         const { userId, username, fullName, email, role, isBlock, phone, dateOfBirth, avatar, languages, certificates, experienceYears, bio, employmentStatus, workingStatus } = payload
         await conn.beginTransaction()
-        const trimOrNull = (value) => (value === null || value === undefined) ? null : String(value).trim();
-        const isBlockOrNull = isBlock => {
-            if (isBlock === null || isBlock === undefined) return null
-            if (isBlock === true || isBlock === 1 || isBlock === "1" || String(isBlock).toLowerCase() === "true") return 1;
-            return 0;
-        }
-        const setRoleOrNull = role => {
-            if (role === null || role === undefined) return null;
-            const r = String(role).trim().toLowerCase();
-            return (r === "admin" || r === "guide") ? r : null;
-        }
+
         const sqlUser = "UPDATE users SET  username  = COALESCE(?, username), full_name = COALESCE(?, full_name), email = COALESCE(?, email), role = COALESCE(?, role), is_block = COALESCE(?, is_block) WHERE id = ?"
 
         const paramsUser = [trimOrNull(username), trimOrNull(fullName), trimOrNull(email), setRoleOrNull(role), isBlockOrNull(isBlock), userId]
@@ -71,7 +61,26 @@ export const adminUpdateUserModel = async (payload = {}) => {
         throw error
     }
 }
+export const guideUpdateProfileModel = async (payload = {}) => {
+    try {
+        const { userId, phone, dateOfBirth, avatar, languages, certificates, experienceYears, bio } = payload
+        const sqlProfile = `UPDATE guide_profiles SET
+                                    phone = COALESCE(?,phone),
+                                    date_of_birth = COALESCE(?,date_of_birth),
+                                    avatar = COALESCE(?,avatar),
+                                    languages = COALESCE(?,languages),
+                                    certificates = COALESCE(?,certificates),
+                                    experience_years = COALESCE(?,experience_years),
+                                    bio = COALESCE(?,bio)
+                        WHERE user_id = ?`
 
+        const params = [trimOrNull(phone), trimOrNull(dateOfBirth), trimOrNull(avatar), trimOrNull(JSON.stringify(languages)), trimOrNull(certificates), trimOrNull(experienceYears), trimOrNull(bio), userId]
+        const [result] = await poolConnection.query(sqlProfile, params)
+        return result
+    } catch (error) {
+        throw error
+    }
+}
 export const getUserWithProfileByIdModel = async (id) => {
     const sql = `SELECT
                         u.id as userId,
