@@ -11,12 +11,18 @@ export const signIn = async (req, res, next) => {
     try {
         const { body, ip } = req
         const userAgent = req.get("user-agent");
-        const {errors} = validatePayload(signInValid, body)
+        const { errors } = validatePayload(signInValid, body)
         if (errors) {
             return res.status(400).json(errors)
         }
         const user = await signInService(body)
         const { id } = user
+        if (!user.is_block) {
+            return res.status(400).json({
+                message: "Tài khoản đã bị khoá, vui lòng liên hệ với admin để biết thêm thông tin",
+
+            })
+        }
         const accessToken = signAccessToken({ id: user.id, username: user.username, role: user.role })
         const refreshToken = signRefreshToken({ id: user.id })
         const refreshToKenHash = hashToken(refreshToken)
@@ -35,7 +41,7 @@ export const signIn = async (req, res, next) => {
 export const signUp = async (req, res, next) => {
     try {
         const payload = req.body;
-        const {errors} = validatePayload(signUpValid, payload)
+        const { errors } = validatePayload(signUpValid, payload)
         if (errors) {
             return res.status(400).json(errors)
         }
