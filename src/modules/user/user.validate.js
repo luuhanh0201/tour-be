@@ -128,3 +128,45 @@ export const profileValid = Joi.object({
     .messages({
         "any.custom": "Bạn chưa gửi trường nào để cập nhật",
     });
+
+export const statusAccountValid = Joi.object({
+    isBlock: Joi.alternatives()
+        .try(
+            Joi.boolean(),
+            Joi.number().valid(0, 1),
+            Joi.string().valid("0", "1", "true", "false")
+        )
+        .default(null)
+        .messages({
+            "alternatives.match": "isBlock không hợp lệ",
+        }),
+
+    employmentStatus: Joi.string()
+        .valid("active", "on_leave", "terminated")
+        .allow(null)
+        .trim()
+        .default(null)
+        .messages({
+            "any.only": "Trạng thái không tồn tại, vui lòng chọn lại",
+        }),
+
+    workingStatus: Joi.string()
+        .valid("available", "on_tour", "busy")
+        .allow(null)
+        .trim()
+        .default(null)
+        .messages({
+            "any.only": "Trạng thái không tồn tại, vui lòng chọn lại",
+        }),
+})
+    .unknown(false)
+    .prefs({ presence: "optional" })
+    .custom((value, helpers) => {
+        const { userId, ...rest } = value;
+        const hasAnyUpdate = Object.values(rest).some(v => v !== null && v !== undefined);
+        if (!hasAnyUpdate) return helpers.error("any.custom");
+        return value;
+    })
+    .messages({
+        "any.custom": "Bạn chưa gửi trường nào để cập nhật",
+    });

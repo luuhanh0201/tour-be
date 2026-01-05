@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { adminUpdateUserController, findAllUserController, findUserByIdController, guideUpdateProfileController } from "./user.controller.js";
+import { adminUpdateUserController, findAllUserController, findUserByIdController, guideUpdateProfileController, updateUserAccountStatusController } from "./user.controller.js";
 import { requireAdmin, requiredAuth, requireGuider } from "../../middlewares/requireAuth.middleware.js";
 
 
@@ -13,7 +13,8 @@ userRoute.put("/update/me", requiredAuth, guideUpdateProfileController)
 userRoute.use(requiredAuth, requireAdmin)
 userRoute.get("/", findAllUserController)
 userRoute.get("/:id", findUserByIdController)
-userRoute.put("/update/:id", adminUpdateUserController)
+userRoute.put("/:id", adminUpdateUserController)
+userRoute.put("/:id/status", updateUserAccountStatusController)
 
 
 // Guide

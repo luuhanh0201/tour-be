@@ -106,3 +106,31 @@ export const getUserWithProfileByIdModel = async (id) => {
     const userProfile = rows[0]
     return { exist: !!userProfile, userProfile }
 }
+export const updateUserAccountStatusModel = async ({ id, isBlock, employmentStatus, workingStatus }) => {
+    const conn = await poolConnection.getConnection()
+    try {
+        await conn.beginTransaction()
+        if (isBlock) {
+            employmentStatus = "on_leave"
+            workingStatus = "busy"
+        }
+        const sqlBlock = `UPDATE users SET is_block = COALESCE(?,is_block) WHERE id = ?`
+        const [userUpdated] = await poolConnection.query(sqlBlock, [isBlockOrNull(isBlock), id])
+
+        const sqlProfile = `UPDATE guide_profiles SET
+                                employment_status = COALESCE(?,employment_status),
+                                working_status = COALESCE(?,working_status)
+                            WHERE user_id = ?`
+        const [profileUpdated] = await poolConnection.query(sqlProfile, [employmentStatus, workingStatus, id])
+        await conn.commit()
+
+        return {
+            userUpdated,
+            profileUpdated
+        }
+    } catch (error) {
+        await conn.rollback()
+        throw error
+    }
+
+}
