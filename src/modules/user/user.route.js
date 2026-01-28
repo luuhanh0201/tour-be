@@ -5,6 +5,7 @@ import { requireAdmin, requiredAuth, requireGuider } from "../../middlewares/req
 
 const userRoute = Router()
 
+// Route guide
 userRoute.put("/update/me", requiredAuth, guideUpdateProfileController)
 
 

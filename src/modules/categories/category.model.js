@@ -45,6 +45,14 @@ export const findCategoryByNameModel = async ({ name }) => {
     category, exists: !!category
   }
 }
+export const findCategoryByIdModel = async ({ id }) => {
+  const sql = "SELECT * FROM categories WHERE id = ? LIMIT 1";
+  const [rows] = await poolConnection.query(sql, [id])
+  const category = rows[0] || null
+  return {
+    category, exists: !!category
+  }
+}
 export const createCategoryModel = async ({ name, description = "" } = {}) => {
   const sql = "INSERT INTO categories (name,description) VALUES(?,?)";
   const [row] = await poolConnection.query(sql, [name, description])
