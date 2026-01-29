@@ -26,7 +26,7 @@ export const findUserByIdController = async (req, res, next) => {
 }
 export const adminUpdateUserController = async (req, res, next) => {
     try {
-        console.log(1)
+        
         const adminCurrent = req.user
         const userId = req.params.id
         const { errors, value } = validatePayload(userUpdateValid, req.body)

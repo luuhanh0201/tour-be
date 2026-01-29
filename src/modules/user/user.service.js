@@ -36,7 +36,7 @@ export const adminUpdateUserService = async (admin, payload) => {
         throw error
     }
     if (role === "admin") {
-        console.log("Xác nhận mật khẩu để tiếp tục")
+        // Note: admin role change requires additional verification (debug log removed)
     }
     const { exists, user } = await findUsernameModel({ username })
     if (exists && user.id !== Number(userId)) {

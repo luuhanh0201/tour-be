@@ -1,4 +1,4 @@
-import { poolConnection } from "../../config/database.js";
+import { poolConnection, query } from "../../config/database.js";
 import { isBlockOrNull, setRoleOrNull, trimOrNull } from "../../utils/formatterValue.until.js";
 
 export const findAllUserModel = async ({ page = 1, limit = 10, q = "" } = {}) => {
@@ -11,10 +11,10 @@ export const findAllUserModel = async ({ page = 1, limit = 10, q = "" } = {}) =>
         const where = q ? "WHERE (username LIKE ? OR email LIKE ? OR full_name LIKE ?)" : ""
         const sqlData = `SELECT * FROM users ${where} ORDER BY id desc  LIMIT ? OFFSET ?`
         const paramsData = q ? [keyword, keyword, keyword, limit, offset] : [limit, offset]
-        const [rows] = await poolConnection.query(sqlData, paramsData)
+        const [rows] = await query(sqlData, paramsData)
         const sqlCount = `SELECT COUNT(*)  AS total FROM users ${where}`
         const paramsCount = q ? [keyword, keyword, keyword] : []
-        const [[countRow]] = await poolConnection.query(sqlCount, paramsCount);
+        const [[countRow]] = await query(sqlCount, paramsCount);
         return {
             data: rows,
             pagination: {
@@ -39,7 +39,7 @@ export const adminUpdateUserModel = async (payload = {}) => {
         const sqlUser = "UPDATE users SET  username  = COALESCE(?, username), full_name = COALESCE(?, full_name), email = COALESCE(?, email), role = COALESCE(?, role), is_block = COALESCE(?, is_block) WHERE id = ?"
 
         const paramsUser = [trimOrNull(username), trimOrNull(fullName), trimOrNull(email), setRoleOrNull(role), isBlockOrNull(isBlock), userId]
-        const [userUpdated] = await poolConnection.query(sqlUser, paramsUser)
+        const [userUpdated] = await conn.query(sqlUser, paramsUser)
 
         const sqlProfile = `UPDATE guide_profiles SET
                                     phone = COALESCE(?,phone),
@@ -53,7 +53,7 @@ export const adminUpdateUserModel = async (payload = {}) => {
                                     working_status = COALESCE(?,working_status)
                             WHERE user_id = ?`
         const paramsProfile = [trimOrNull(phone), trimOrNull(dateOfBirth), trimOrNull(avatar), trimOrNull(JSON.stringify(languages)), trimOrNull(certificates), trimOrNull(experienceYears), trimOrNull(bio), trimOrNull(employmentStatus), trimOrNull(workingStatus), userId]
-        const [profileUpdated] = await poolConnection.query(sqlProfile, paramsProfile)
+        const [profileUpdated] = await conn.query(sqlProfile, paramsProfile)
         await conn.commit()
         return { userUpdated, profileUpdated };
     } catch (error) {
@@ -75,7 +75,7 @@ export const guideUpdateProfileModel = async (payload = {}) => {
                         WHERE user_id = ?`
 
         const params = [trimOrNull(phone), trimOrNull(dateOfBirth), trimOrNull(avatar), trimOrNull(JSON.stringify(languages)), trimOrNull(certificates), trimOrNull(experienceYears), trimOrNull(bio), userId]
-        const [result] = await poolConnection.query(sqlProfile, params)
+        const [result] = await query(sqlProfile, params)
         return result
     } catch (error) {
         throw error
@@ -101,8 +101,8 @@ export const getUserWithProfileByIdModel = async (id) => {
                         gp.working_status    AS workingStatus
                 FROM users u LEFT JOIN guide_profiles gp ON gp.user_id = u.id WHERE u.id = ?`
 
-    const [rows] = await poolConnection.query(sql, [id])
-    console.log(rows)
+    const [rows] = await query(sql, [id])
+        // console.log(rows) // Debug log removed
     const userProfile = rows[0]
     return { exist: !!userProfile, userProfile }
 }
@@ -115,13 +115,13 @@ export const updateUserAccountStatusModel = async ({ id, isBlock, employmentStat
             workingStatus = "busy"
         }
         const sqlBlock = `UPDATE users SET is_block = COALESCE(?,is_block) WHERE id = ?`
-        const [userUpdated] = await poolConnection.query(sqlBlock, [isBlockOrNull(isBlock), id])
+        const [userUpdated] = await conn.query(sqlBlock, [isBlockOrNull(isBlock), id])
 
         const sqlProfile = `UPDATE guide_profiles SET
                                 employment_status = COALESCE(?,employment_status),
                                 working_status = COALESCE(?,working_status)
                             WHERE user_id = ?`
-        const [profileUpdated] = await poolConnection.query(sqlProfile, [employmentStatus, workingStatus, id])
+        const [profileUpdated] = await conn.query(sqlProfile, [employmentStatus, workingStatus, id])
         await conn.commit()
 
         return {

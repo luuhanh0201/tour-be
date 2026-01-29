@@ -1,4 +1,4 @@
-import { poolConnection } from "../../config/database.js";
+import { poolConnection, query } from "../../config/database.js";
 
 export const findAllServiceModel = async ({ page = 1, limit = 10, q = "" } = {}) => {
     q = String(q ?? "").trim();
@@ -17,7 +17,7 @@ export const findAllServiceModel = async ({ page = 1, limit = 10, q = "" } = {})
       `;
 
     const paramsData = q ? [keyword, keyword, limit, offset] : [limit, offset];
-    const [rows] = await poolConnection.query(sqlData, paramsData);
+    const [rows] = await query(sqlData, paramsData);
 
     const sqlCount = `
         SELECT COUNT(*) AS total
@@ -25,7 +25,7 @@ export const findAllServiceModel = async ({ page = 1, limit = 10, q = "" } = {})
         ${where}
       `;
     const paramsCount = q ? [keyword, keyword] : [];
-    const [[countRow]] = await poolConnection.query(sqlCount, paramsCount);
+    const [[countRow]] = await query(sqlCount, paramsCount);
 
     return {
         data: rows,
@@ -40,7 +40,7 @@ export const findAllServiceModel = async ({ page = 1, limit = 10, q = "" } = {})
 }
 export const findServiceByIdModel = async ({ id }) => {
     const sql = "SELECT * FROM tour_services WHERE id = ? LIMIT 1";
-    const [rows] = await poolConnection.query(sql, [id])
+    const [rows] = await query(sql, [id])
     const service = rows[0] || null
     return {
         exists: !!service,
@@ -49,7 +49,7 @@ export const findServiceByIdModel = async ({ id }) => {
 }
 export const findServiceByNameModel = async ({ serviceName }) => {
     const sql = "SELECT * FROM tour_services WHERE service_name = ? LIMIT 1";
-    const [rows] = await poolConnection.query(sql, [serviceName])
+    const [rows] = await query(sql, [serviceName])
     const service = rows[0] || null
     return {
         exists: !!service,
@@ -58,16 +58,16 @@ export const findServiceByNameModel = async ({ serviceName }) => {
 }
 export const createServiceModel = async ({ tourId, serviceType, serviceName, contactInfo, address, description }) => {
     const sql = "INSERT INTO tour_services (tour_id,service_type,service_name,contact_info,address,description) VALUES (?,?,?,?,?,?)"
-    const [row] = await poolConnection.query(sql, [tourId, serviceType, serviceName, contactInfo, address, description])
+    const [row] = await query(sql, [tourId, serviceType, serviceName, contactInfo, address, description])
     return row || null
 }
 export const updateServiceModel = async ({ serviceId, tourId, serviceType, serviceName, contactInfo, address, description }) => {
     const sql = "UPDATE tour_services SET tour_id = ?,service_type = ?,service_name = ?,contact_info = ?,address = ?,description = ? WHERE id = ?"
-    const [result] = await poolConnection.query(sql, [tourId, serviceType, serviceName, contactInfo, address, description, serviceId])
+    const [result] = await query(sql, [tourId, serviceType, serviceName, contactInfo, address, description, serviceId])
     return result
 }
 export const deleteServiceModel = async (id) => {
     const sql = "DELETE FROM tour_services WHERE id = ?"
-    const [result] = await poolConnection.query(sql, [id])
+    const [result] = await query(sql, [id])
     return result?.affectedRows > 0
 }

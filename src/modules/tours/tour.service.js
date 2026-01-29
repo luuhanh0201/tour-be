@@ -1,22 +1,24 @@
 import generateRandomNumber from "../../utils/number.until.js"
 import getInitials from "../../utils/string.until.js"
 import { findCategoryByIdModel } from "../categories/category.model.js"
-import { addNewTourModel, findAllTourModel, findTourByCodeModel, findTourByNameModel } from "./tour.model.js"
+import { addNewTourModel, findAllTourModel, findTourByCodeModel, findTourByIdModel, findTourByNameModel, updateTourModel, deleteTourModel } from "./tour.model.js"
 
 export const findAllTourService = async (payload = {}) => {
     const { limit = 10, page = 1, q = "" } = payload
     const tours = await findAllTourModel({ page: page, limit: limit, q: q })
     return tours
 }
+
 export const addNewTourService = async (payload = {}) => {
     const { name, categoryId } = payload
-    const { exists } = await findTourByNameModel({ name });
+    const { exists } = await findTourByNameModel({ tourName: name });
     if (exists) {
         const error = new Error("Tour đã tồn tại");
         error.status = 409;
         error.name = "TOUR_ERROR"
         throw error
     }
+
     const { category } = await findCategoryByIdModel({ id: categoryId });
     let randomCode = getInitials(category.name) + generateRandomNumber(3);
     const { exist } = await findTourByCodeModel({ code: randomCode });
@@ -27,7 +29,54 @@ export const addNewTourService = async (payload = {}) => {
         isCode = res.exist
     }
     const newPayload = { ...payload, code: randomCode }
-    const newTour = await addNewTourModel(newPayload);
-    return newTour || null
+    // const newTour = await addNewTourModel(newPayload);
+    // return newTour || null
 
+}
+export const findTourByIdService = async ({ tourId }) => {
+    const { exist, tour } = await findTourByIdModel({ tourId });
+    if (!exist) {
+        const error = new Error("Tour không tồn tại");
+        error.status = 404;
+        error.name = "TOUR_NOT_FOUND"
+        throw error
+    }
+    return tour;
+}
+export const updateTourService = async (payload = {}) => {
+    const { tourId, ...updateData } = payload
+
+    const { exist, tour } = await findTourByIdModel({ tourId });
+    if (!exist) {
+        const error = new Error("Tour không tồn tại");
+        error.status = 404;
+        error.name = "TOUR_NOT_FOUND"
+        throw error
+    }
+    const modelPayload = {
+        id: tourId,
+        name: updateData.name,
+        categoryId: updateData.categoryId,
+        durationDays: updateData.durationDays,
+        durationNights: updateData.durationNights,
+        description: updateData.description,
+        highlights: updateData.highlights,
+        basePrice: updateData.basePrice,
+        status: updateData.status,
+    }
+
+    const result = await updateTourModel(modelPayload);
+    const { tour: updatedTour } = await findTourByIdModel({ tourId });
+    return { result, updatedTour };
+}
+export const deleteTourService = async ({ tourId } = {}) => {
+    const { exist } = await findTourByIdModel({ tourId });
+    if (!exist) {
+        const error = new Error("Tour không tồn tại");
+        error.status = 404;
+        error.name = "TOUR_NOT_FOUND"
+        throw error
+    }
+    const deleted = await deleteTourModel(tourId);
+    return deleted;
 }

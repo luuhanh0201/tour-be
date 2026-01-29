@@ -5,8 +5,8 @@ import { serviceValid } from "./service.validation.js"
 
 export const getAllServiceController = async (req, res, next) => {
     try {
-        const error = validatePayload(queryValid, req.body)
-        if (error) return res.status(400).json(error)
+        const { errors } = validatePayload(queryValid, req.body)
+        if (errors) return res.status(400).json(errors)
         const tourServices = await findAllServiceService(req.body)
         return res.status(200).json(tourServices)
     } catch (error) {

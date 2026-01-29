@@ -1,4 +1,4 @@
-import { poolConnection } from "../../config/database.js"
+import { poolConnection, query } from "../../config/database.js"
 
 export const getAllCategoryModel = async ({ page = 1, limit = 10, q = "" } = {}) => {
   page = Math.max(1, parseInt(page || 1, 10));
@@ -16,7 +16,7 @@ export const getAllCategoryModel = async ({ page = 1, limit = 10, q = "" } = {})
   `;
 
   const paramsData = q ? [keyword, keyword, limit, offset] : [limit, offset];
-  const [rows] = await poolConnection.query(sqlData, paramsData);
+  const [rows] = await query(sqlData, paramsData);
 
   const sqlCount = `
     SELECT COUNT(*) AS total
@@ -24,7 +24,7 @@ export const getAllCategoryModel = async ({ page = 1, limit = 10, q = "" } = {})
     ${where}
   `;
   const paramsCount = q ? [keyword, keyword] : [];
-  const [[countRow]] = await poolConnection.query(sqlCount, paramsCount);
+  const [[countRow]] = await query(sqlCount, paramsCount);
 
   return {
     data: rows,
@@ -39,7 +39,7 @@ export const getAllCategoryModel = async ({ page = 1, limit = 10, q = "" } = {})
 
 export const findCategoryByNameModel = async ({ name }) => {
   const sql = "SELECT * FROM categories WHERE name = ? LIMIT 1";
-  const [rows] = await poolConnection.query(sql, [name])
+  const [rows] = await query(sql, [name])
   const category = rows[0] || null
   return {
     category, exists: !!category
@@ -47,7 +47,7 @@ export const findCategoryByNameModel = async ({ name }) => {
 }
 export const findCategoryByIdModel = async ({ id }) => {
   const sql = "SELECT * FROM categories WHERE id = ? LIMIT 1";
-  const [rows] = await poolConnection.query(sql, [id])
+  const [rows] = await query(sql, [id])
   const category = rows[0] || null
   return {
     category, exists: !!category
@@ -55,16 +55,16 @@ export const findCategoryByIdModel = async ({ id }) => {
 }
 export const createCategoryModel = async ({ name, description = "" } = {}) => {
   const sql = "INSERT INTO categories (name,description) VALUES(?,?)";
-  const [row] = await poolConnection.query(sql, [name, description])
+  const [row] = await query(sql, [name, description])
   return row || null
 }
 export const updateCategoryModel = async ({ name, description = "", id } = {}) => {
   const sql = "UPDATE categories  SET name = ?, description = ? WHERE id = ?"
-  const [result] = await poolConnection.query(sql, [name, description, id])
+  const [result] = await query(sql, [name, description, id])
   return result
 }
 export const deleteCategoryModel = async (id) => {
   const sql = "DELETE FROM categories WHERE id = ?"
-  const [result] = await poolConnection.query(sql, [id])
+  const [result] = await query(sql, [id])
   return result?.affectedRows > 0
 }
