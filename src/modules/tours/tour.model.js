@@ -53,16 +53,15 @@ export const findTourByIdModel = async ({ tourId }) => {
     const sql = "SELECT tour.*, category.name AS category_name FROM tours AS tour INNER JOIN categories AS category ON tour.category_id = category.id WHERE tour.id = ? LIMIT 1";
     const [rows] = await query(sql, [tourId]);
     const tour = rows[0] || null;
+
+    const sqlIt = " SELECT day_number,start_time,end_time,title,description FROM tour_itineraries WHERE tour_id = ? ORDER BY day_number ASC, start_time ASC, id ASC"
+    const [itRows] = await query(sqlIt, [tourId])
+    const itineraries = itRows || null
+    console.log({ tour, itineraries })
     return {
         exist: !!tour,
-        tour: tour
+        tour, itineraries
     }
-}
-export const addNewTourModel = async (payload = {}) => {
-    const { code, name, categoryId, durationDays, durationNights, description, highlights, basePrice, status } = payload
-    const sql = "INSERT INTO tours (code,name,category_id, duration_days,duration_nights,description,highlights,base_price,status) VALUES (?,?,?,?,?,?,?,?,?)"
-    const [row] = await query(sql, [code, name, categoryId, durationDays, durationNights, description, highlights, basePrice, status])
-    return row || null
 }
 export const updateTourModel = async (payload = {}) => {
     const { id, name, categoryId, durationDays, durationNights, description, highlights, basePrice, status } = payload;
@@ -86,4 +85,35 @@ export const deleteTourModel = async (id) => {
     const sql = "DELETE FROM tours WHERE id = ?";
     const [result] = await query(sql, [id]);
     return result?.affectedRows > 0;
+}
+
+export const insertTourWithItinerariesModel = async (payload = {}) => {
+    const conn = await poolConnection.getConnection()
+    try {
+        await conn.beginTransaction();
+        const { code, name, categoryId, durationDays, durationNights, description, highlights, basePrice, status, itineraries = [] } = payload
+        const sqlTour = "INSERT INTO tours (code,name,category_id, duration_days,duration_nights,description,highlights,base_price,status) VALUES (?,?,?,?,?,?,?,?,?)"
+        const paramsTour = [code, name, categoryId, durationDays, durationNights, description, highlights, basePrice, status]
+        const [insertTour] = await conn.query(sqlTour, paramsTour)
+
+        const idTour = insertTour?.insertId;
+
+        let insertItineraries;
+        if (Array.isArray(itineraries) && itineraries.length > 0) {
+            const sqlItineraries = "INSERT INTO tour_itineraries (tour_id, day_number, start_time, end_time, title, description ) VALUES ?";
+            const values = itineraries.map(({ dayNumber, startTime, endTime, title, description }) => ([idTour, dayNumber, startTime, endTime, title || null, description || null]))
+            const [row] = await conn.query(sqlItineraries, [values])
+            insertItineraries = row
+        }
+        await conn.commit();
+        return {
+            insertItineraries, insertTour
+        }
+    } catch (error) {
+        await conn.rollback()
+        throw error
+    } finally {
+        conn.release()
+
+    }
 }
