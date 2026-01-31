@@ -33,3 +33,23 @@ export const tourValid = Joi.object({
     status: Joi.string().valid("active", "inactive").default("active"),
 
 })
+export const itinerariesValid = Joi.object({
+    dayNumber: Joi.number().integer().min(1).required().messages({
+        "number.base": "Số ngày không hợp lệ",
+        "number.integer": "Số ngày không hợp lệ",
+        "number.min": "Số ngày phải >= 1",
+        "any.required": "Vui lòng nhập số ngày",
+    }),
+    startTime: Joi.string().pattern(/^([0-1]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/).required().messages({
+        "string.pattern.base": "Thời gian bắt đầu phải theo định dạng HH:mm",
+        "any.required": "Vui lòng nhập thời gian bắt đầu",
+    }),
+    endTime: Joi.string().pattern(/^([0-1]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/).required().messages({
+        "string.pattern.base": "Thời gian kết thúc phải theo định dạng HH:mm",
+        "any.required": "Vui lòng nhập thời gian kết thúc",
+    }),
+    title: Joi.string().trim().max(255).required().messages({
+        "any.required": "Không thể bỏ trống dòng này."
+    }),
+    description: Joi.string().allow("", null),
+})

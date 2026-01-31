@@ -1,7 +1,8 @@
 import { validatePayload } from "../../utils/validatePayload.until.js"
 import { queryValid } from "../categories/category.validation.js"
-import { addNewTourService, findAllTourService, findTourByIdService, updateTourService, deleteTourService } from "./tour.service.js"
-import { tourValid } from "./tour.validation.js"
+import { findItinerariesByIdModel } from "./tour.model.js"
+import { addNewTourService, findAllTourService, findTourByIdService, updateTourService, deleteTourService, updateItinerariesByIdService } from "./tour.service.js"
+import { itinerariesValid, tourValid } from "./tour.validation.js"
 
 export const findAllTourController = async (req, res, next) => {
     try {
@@ -19,7 +20,6 @@ export const addNewTourController = async (req, res, next) => {
     try {
         const { itineraries, ...payload } = req.body
         const { errors, value } = validatePayload(tourValid, payload)
-        console.log(errors)
         if (errors) return res.status(400).json(errors)
         const newTour = await addNewTourService(req.body)
         return res.status(200).json({
@@ -67,6 +67,24 @@ export const deleteTourController = async (req, res, next) => {
         const deleted = await deleteTourService({ tourId: id })
         if (!deleted) return res.status(404).json({ message: "Tour không tồn tại hoặc đã xóa" })
         return res.status(200).json({ message: "Xóa tour thành công" })
+    } catch (error) {
+        next(error)
+    }
+}
+export const updateItinerariesByTourIdController = async (req, res, next) => {
+    try {
+        const { tourId, id } = req.params
+        const payload = req.body
+        const { itinerary } = await findItinerariesByIdModel({ id })
+        const valueItinerary = { ...itinerary, ...payload }
+        const { errors, value } = validatePayload(itinerariesValid, valueItinerary)
+        if (errors) return res.status(400).json(errors)
+        console.log(value)
+        const updatedItineraries = await updateItinerariesByIdService({ ...value, id, tourId })
+        return res.status(200).json({
+            message: "Cập nhật lịch trình thành công",
+            updatedItineraries
+        })
     } catch (error) {
         next(error)
     }

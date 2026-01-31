@@ -57,10 +57,10 @@ export const findTourByIdModel = async ({ tourId }) => {
     const sqlIt = " SELECT day_number,start_time,end_time,title,description FROM tour_itineraries WHERE tour_id = ? ORDER BY day_number ASC, start_time ASC, id ASC"
     const [itRows] = await query(sqlIt, [tourId])
     const itineraries = itRows || null
-    console.log({ tour, itineraries })
+    const result = { ...tour, itineraries }
     return {
         exist: !!tour,
-        tour, itineraries
+        tour: result
     }
 }
 export const updateTourModel = async (payload = {}) => {
@@ -115,5 +115,27 @@ export const insertTourWithItinerariesModel = async (payload = {}) => {
     } finally {
         conn.release()
 
+    }
+}
+export const updateItinerariesByIdModel = async (payload = {}) => {
+    const { id, dayNumber, startTime, endTime, title, description } = payload
+    const sql = `UPDATE tour_itineraries SET
+                    day_number = COALESCE(?, day_number),
+                    start_time = COALESCE(?, start_time),
+                    end_time = COALESCE(?, end_time),
+                    title = COALESCE(?, title),
+                    description = COALESCE(?, description)
+                WHERE id = ?`
+    const params = [dayNumber, startTime, endTime, title, description, id]
+    const [result] = await query(sql, params)
+    return result || null
+}
+export const findItinerariesByIdModel = async ({ id }) => {
+    const sql = "SELECT day_number, start_time, end_time, title, description FROM tour_itineraries WHERE id = ? LIMIT 1";
+    const [rows] = await query(sql, [id]);
+    const itinerary = rows[0] || null;
+    return {
+        exist: !!itinerary,
+        itinerary: itinerary || null
     }
 }
