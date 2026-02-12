@@ -2,7 +2,7 @@ import generateRandomNumber from "../../utils/number.until.js";
 import getInitials from "../../utils/string.until.js";
 import { findTourByIdModel } from "../tours/tour.model.js";
 import { getGuideProfileByIdModel, } from "../user/user.model.js";
-import { createTourDepartureModel, findTourDepartureByCodeModel, getAllTourDepartureModel } from "./tourDepartures.model.js";
+import { changeStatusTourDepartureModel, createTourDepartureModel, findTourDepartureByCodeModel, getAllTourDepartureModel } from "./tourDepartures.model.js";
 
 export const createTourDepartureService = async (payload = {}) => {
     const { tourId, guideId, departureCode, departureDay, departureTime, returnDay, returnTime, meetingPoint, meetingTime, driverName, driverPhone, vehicleInfo, currentParticipants, maxParticipants, status, notes } = payload;
@@ -77,6 +77,18 @@ export const getAllTourDepartureService = async (payload = {}) => {
     const tours = await getAllTourDepartureModel({ page: page, limit: limit, q: q })
     return tours
 }
-export const updateTourDepartureService = async (payload = {}) => {
+export const changeStatusTourDepartureService = async (id, status) => {
+    const validStatus = ['in_progress', 'scheduled', 'completed', 'cancelled']
+    if (!validStatus.includes(status)) {
+        status = null
+        const error = new Error("Trạng thái không tồn tại")
+        error.name = "STATUS ERROR"
+        error.status = 409
+        throw error
+    }
+
+    const result = await changeStatusTourDepartureModel(id, status)
+    return result
+
 
 }

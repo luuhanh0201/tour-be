@@ -66,3 +66,15 @@ export const getAllTourDepartureModel = async ({ q = "", limit = 10, page = 1 })
         },
     }
 }
+export const changeStatusTourDepartureModel = async (id, status) => {
+    const validStatus = ['in_progress', 'scheduled', 'completed', 'cancelled']
+    if (!validStatus.includes(status)) {
+        status = null
+    }
+    const sql = "UPDATE tour_departures SET status = COALESCE(?,status) WHERE id = ?"
+    const params = [status, id]
+    const [result] = await query(sql, params)
+    return result
+
+
+}

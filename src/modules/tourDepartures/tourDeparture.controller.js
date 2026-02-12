@@ -1,6 +1,7 @@
 import { validatePayload } from "../../utils/validatePayload.until.js";
 import { queryValid } from "../categories/category.validation.js";
-import { createTourDepartureService, getAllTourDepartureService } from "./tourDepartures.service.js"
+import { changeStatusTourDepartureModel } from "./tourDepartures.model.js";
+import { changeStatusTourDepartureService, createTourDepartureService, getAllTourDepartureService } from "./tourDepartures.service.js"
 import { departureValid } from "./tourDepartures.validate.js";
 
 export const createTourDepartureController = async (req, res, next) => {
@@ -24,6 +25,16 @@ export const getAllTourDepartureController = async (req, res, next) => {
         const tours = await getAllTourDepartureService(value)
 
         return res.status(200).json({ message: "Danh sách lịch khởi hành tour", tours })
+    } catch (error) {
+        next(error)
+    }
+}
+export const changeStatusTourDepartureController = async (req, res, next) => {
+    try {
+        const { status } = req.body
+        const id = req.params.id
+        const updated = await changeStatusTourDepartureService(id, status)
+        return res.status(200).json({ message: updated.changedRows !== 0 ? "Cập nhật trạng thái thành công" : "Dữ liệu không thay đổi", updated })
     } catch (error) {
         next(error)
     }
