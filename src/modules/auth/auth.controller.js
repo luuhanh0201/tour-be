@@ -17,7 +17,7 @@ export const signIn = async (req, res, next) => {
         }
         const user = await signInService(body)
         const { id } = user
-        if (!user.is_block) {
+        if (!user.isBlock) {
             return res.status(400).json({
                 message: "Tài khoản đã bị khoá, vui lòng liên hệ với admin để biết thêm thông tin",
 
@@ -75,8 +75,8 @@ export const refreshToken = async (req, res, next) => {
             throw error
         }
 
-        const newAccessToken = signAccessToken({ id: session.user_id })
-        const newRefreshToken = signRefreshToken({ id: session.user_id })
+        const newAccessToken = signAccessToken({ id: session.userId })
+        const newRefreshToken = signRefreshToken({ id: session.userId })
         const newHash = hashToken(newRefreshToken);
 
         const result = await updateRefreshTokenModel({ id: session.id, refreshToKenHash: newHash, expiresAt: newExpiresAt })

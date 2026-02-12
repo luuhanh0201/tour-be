@@ -102,8 +102,7 @@ export const getUserWithProfileByIdModel = async (id) => {
                 FROM users u LEFT JOIN guide_profiles gp ON gp.user_id = u.id WHERE u.id = ?`
 
     const [rows] = await query(sql, [id])
-        // console.log(rows) // Debug log removed
-    const userProfile = rows[0]
+    const userProfile = rows[0] || null
     return { exist: !!userProfile, userProfile }
 }
 export const updateUserAccountStatusModel = async ({ id, isBlock, employmentStatus, workingStatus }) => {
@@ -133,4 +132,30 @@ export const updateUserAccountStatusModel = async ({ id, isBlock, employmentStat
         throw error
     }
 
+}
+export const getGuideProfileByIdModel = async ({ idGuide }) => {
+    const sql = `SELECT
+                        u.id,
+                        u.username,
+                        u.full_name,
+                        u.email,
+                        u.role,
+                        u.is_block,
+                        gp.phone,
+                        gp.date_of_birth,
+                        gp.avatar,
+                        gp.languages,
+                        gp.certificates,
+                        gp.experience_years,
+                        gp.bio,
+                        gp.employment_status,
+                        gp.working_status
+                FROM users u LEFT JOIN guide_profiles gp ON gp.user_id = u.id WHERE gp.id = ? AND u.role = 'guide'`
+
+    const [rows] = await query(sql, [idGuide])
+    const guideProfile = rows[0] || null
+    return {
+        exist: !!guideProfile,
+        guideProfile
+    }
 }

@@ -92,7 +92,7 @@ export const insertTourWithItinerariesModel = async (payload = {}) => {
     try {
         await conn.beginTransaction();
         const { code, name, categoryId, durationDays, durationNights, description, highlights, basePrice, status, itineraries = [] } = payload
-        const sqlTour = "INSERT INTO tours (code,name,category_id, duration_days,duration_nights,description,highlights,base_price,status) VALUES (?,?,?,?,?,?,?,?,?)"
+        const sqlTour = "INSERT INTO tours (departure_code,name,category_id, duration_days,duration_nights,description,highlights,base_price,status) VALUES (?,?,?,?,?,?,?,?,?)"
         const paramsTour = [code, name, categoryId, durationDays, durationNights, description, highlights, basePrice, status]
         const [insertTour] = await conn.query(sqlTour, paramsTour)
 
@@ -138,4 +138,13 @@ export const findItinerariesByIdModel = async ({ id }) => {
         exist: !!itinerary,
         itinerary: itinerary || null
     }
+}
+export const existsTourById = async (tourId) => {
+    const sql = `
+            SELECT EXISTS(
+            SELECT * FROM tours WHERE id = ?
+                        ) as exists_flag;
+    `
+    const [exists] = await query(sql, [tourId])
+    return exists[0]?.existsFlag ? true : false
 }

@@ -12,7 +12,6 @@ export function generateRandomNumber(digits = 4) {
   return result;
 }
 
-// Return numeric value (may drop leading zeros). Use only if you need a number.
 export function generateRandomNumberAsInt(digits = 4) {
   const str = generateRandomNumber(digits);
   return parseInt(str, 10);

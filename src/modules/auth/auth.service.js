@@ -27,7 +27,7 @@ export const signInService = async (payload) => {
         error.name = "ACCOUNT_NOT_FOUND"
         throw error
     }
-    const isPassword = await bcrypt.compare(password, user.password_hash)
+    const isPassword = await bcrypt.compare(password, user.passwordHash)
     if (!isPassword) {
         const error = new Error("Sai mật khẩu.")
         error.name = "ERROR_PASSWORD"
