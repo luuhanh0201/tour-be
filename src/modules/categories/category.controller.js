@@ -30,7 +30,7 @@ export const getALlCategoryController = async (req, res, next) => {
     }
 }
 export const createCategoryController = async (req, res, next) => {
-    try {   
+    try {
         const { errors } = validatePayload(categoryValid, req.body)
         if (errors) {
             return validationErrorResponse(res, errors, 400)
@@ -44,7 +44,7 @@ export const createCategoryController = async (req, res, next) => {
 
 export const updateCategoryController = async (req, res, next) => {
     try {
-        const {errors} = validatePayload(categoryValid, req.body)
+        const { errors } = validatePayload(categoryValid, req.body)
         if (errors) {
             return validationErrorResponse(res, errors, 400)
         }

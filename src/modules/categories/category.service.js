@@ -15,8 +15,9 @@ export const createCategoryService = async (payload) => {
 
 export const updateCategoryService = async (payload) => {
     const { id, name, description } = payload
-    const { exists } = await findCategoryByNameModel({ name })
-    if (exists) {
+    const { exists, category } = await findCategoryByNameModel({ name })
+    console.log(id)
+    if (exists && Number(id) !== category.id) {
         const error = new Error("Tên này đã tồn tại, vui lòng đổi tên khác")
         error.status = 409
         error.name = "CATEGORY_NAME_ERROR"
@@ -30,5 +31,5 @@ import { deleteCategoryModel } from "./category.model.js"
 
 export const deleteCategoryService = async (id) => {
     const deleted = await deleteCategoryModel(id)
-    return deleted 
+    return deleted
 }
