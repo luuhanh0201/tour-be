@@ -1,6 +1,8 @@
 import { poolConnection, query } from "../../config/database.js"
 
 export const getAllCategoryModel = async ({ page = 1, limit = 10, q = "" } = {}) => {
+  console.log("MODEL CALLED WITH:", { page, limit, q });
+
   page = Math.max(1, parseInt(page || 1, 10));
   limit = Math.min(100, Math.max(1, parseInt(limit || 10, 10)));
   const offset = (page - 1) * limit;
@@ -29,6 +31,7 @@ export const getAllCategoryModel = async ({ page = 1, limit = 10, q = "" } = {})
   return {
     data: rows,
     pagination: {
+      q,
       page,
       limit,
       total: countRow.total,
@@ -59,7 +62,7 @@ export const createCategoryModel = async ({ name, description = "" } = {}) => {
   return row || null
 }
 export const updateCategoryModel = async ({ name, description = "", id } = {}) => {
-  const sql = "UPDATE categories  SET name = ?, description = ? WHERE id = ?"
+  const sql = "UPDATE categories SET name = COALESCE(?, name), description = COALESCE(?, description) WHERE id = ?"
   const [result] = await query(sql, [name, description, id])
   return result
 }

@@ -3,6 +3,7 @@ import { hashToken, signAccessToken, signRefreshToken, verifyRefreshToken } from
 import { createAccessTokenModel, findRefreshTokenHashModel, revokeSessionByRefreshTokenHashModel, updateRefreshTokenModel } from "./auth.model.js";
 import { signInService, signUpService } from "./auth.service.js";
 import { signInValid, signUpValid } from "./auth.validation.js"
+import { successResponse, validationErrorResponse, errorResponse } from "../../utils/response.util.js";
 import dotenv from "dotenv"
 dotenv.config()
 const REFRESH_DAYS = 7
@@ -13,27 +14,19 @@ export const signIn = async (req, res, next) => {
         const userAgent = req.get("user-agent");
         const { errors } = validatePayload(signInValid, body)
         if (errors) {
-            return res.status(400).json(errors)
+            return validationErrorResponse(res, errors, 400)
         }
         const user = await signInService(body)
         const { id } = user
         if (!user.isBlock) {
-            return res.status(400).json({
-                message: "Tài khoản đã bị khoá, vui lòng liên hệ với admin để biết thêm thông tin",
-
-            })
+            return errorResponse(res, "Tài khoản đã bị khoá, vui lòng liên hệ với admin để biết thêm thông tin", null, 400)
         }
         const accessToken = signAccessToken({ id: user.id, username: user.username, role: user.role })
         const refreshToken = signRefreshToken({ id: user.id })
         const refreshToKenHash = hashToken(refreshToken)
         const expiresAt = addDays(REFRESH_DAYS);
         await createAccessTokenModel({ userId: id, refreshToKenHash: refreshToKenHash, expiresAt: expiresAt, ip, userAgent })
-        return res.status(200).json({
-            message: "Đăng nhập thành công",
-            data: user,
-            accessToken,
-            refreshToken,
-        })
+        return successResponse(res, "Đăng nhập thành công", { user, accessToken, refreshToken }, 200)
     } catch (error) {
         next(error)
     }
@@ -43,14 +36,11 @@ export const signUp = async (req, res, next) => {
         const payload = req.body;
         const { errors } = validatePayload(signUpValid, payload)
         if (errors) {
-            return res.status(400).json(errors)
+            return validationErrorResponse(res, errors, 400)
         }
         const user = await signUpService(payload);
 
-        return res.json({
-            message: "Đăng ký tài khoản thành công.",
-            data: user
-        })
+        return successResponse(res, "Đăng ký tài khoản thành công", user, 200)
     } catch (error) {
         next(error)
     }
@@ -86,7 +76,7 @@ export const refreshToken = async (req, res, next) => {
             error.status = 400
             throw error
         }
-        return res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+        return successResponse(res, "Làm mới token thành công", { accessToken: newAccessToken, refreshToken: newRefreshToken }, 200);
     } catch (error) {
         next(error)
     }
@@ -108,7 +98,7 @@ export const logout = async (req, res, next) => {
             error.status = 400
             throw error
         }
-        return res.status(200).json({ message: "Đã đăng xuất" });
+        return successResponse(res, "Đã đăng xuất", null, 200);
     } catch (error) {
         next(error)
     }

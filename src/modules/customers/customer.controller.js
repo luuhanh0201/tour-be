@@ -8,6 +8,7 @@ import {
     updateCustomerService,
     deleteCustomerService,
 } from "./customer.service.js";
+import { successResponse, validationErrorResponse, errorResponse } from "../../utils/response.util.js";
 
 export const findAllCustomerController = async (req, res, next) => {
     try {
@@ -17,10 +18,10 @@ export const findAllCustomerController = async (req, res, next) => {
                 acc[cur.path[0]] = cur.message;
                 return acc;
             }, {});
-            return res.status(400).json({ errors });
+            return validationErrorResponse(res, errors, 400);
         }
         const customers = await findAllCustomerService(value || {});
-        return res.status(200).json(customers);
+        return successResponse(res, "Danh sách khách hàng", customers, 200);
     } catch (error) {
         next(error);
     }
@@ -30,7 +31,7 @@ export const findCustomerByIdController = async (req, res, next) => {
     try {
         const { id } = req.params;
         const customer = await findCustomerByIdService(id);
-        return res.status(200).json(customer);
+        return successResponse(res, "Thông tin khách hàng", customer, 200);
     } catch (error) {
         next(error);
     }
@@ -40,9 +41,9 @@ export const createCustomerController = async (req, res, next) => {
     try {
         const payload = req.body;
         const { errors, value } = validatePayload(customerValid, payload);
-        if (errors) return res.status(400).json(errors);
+        if (errors) return validationErrorResponse(res, errors, 400);
         const newCustomer = await createCustomerService(value);
-        return res.status(201).json({ message: "Tạo khách hàng thành công", data: newCustomer });
+        return successResponse(res, "Tạo khách hàng thành công", newCustomer, 201);
     } catch (error) {
         next(error);
     }
@@ -56,9 +57,9 @@ export const updateCustomerController = async (req, res, next) => {
         const newCustomer = { ...rest, ...req.body };
         const { errors, value } = validatePayload(customerValid, newCustomer);
         console.log(newCustomer)
-        if (errors) return res.status(400).json(errors);
+        if (errors) return validationErrorResponse(res, errors, 400);
         const updated = await updateCustomerService({ id: Number(id), ...value });
-        return res.status(200).json({ message: "Cập nhật thành công", updated });
+        return successResponse(res, "Cập nhật thành công", updated, 200);
     } catch (error) {
         next(error);
     }
@@ -68,8 +69,8 @@ export const deleteCustomerController = async (req, res, next) => {
     try {
         const { id } = req.params;
         const deleted = await deleteCustomerService(Number(id));
-        if (!deleted) return res.status(404).json({ message: "Customer không tồn tại" });
-        return res.status(200).json({ message: "Xóa thành công" });
+        if (!deleted) return errorResponse(res, "Customer không tồn tại", null, 404);
+        return successResponse(res, "Xóa thành công", null, 200);
     } catch (error) {
         next(error);
     }

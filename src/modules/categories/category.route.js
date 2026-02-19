@@ -4,8 +4,8 @@ import { requireAdmin, requiredAuth } from "../../middlewares/requireAuth.middle
 
 const categoryRoute = Router()
 categoryRoute.get("/", getALlCategoryController)
-categoryRoute.post("/create", requiredAuth, requireAdmin, createCategoryController)
-categoryRoute.put("/update/:id", requiredAuth, requireAdmin, updateCategoryController)
-categoryRoute.delete("/delete/:id", requiredAuth, requireAdmin, deleteCategoryController)
+categoryRoute.post("/create", createCategoryController)
+categoryRoute.put("/update/:id", updateCategoryController)
+categoryRoute.delete("/delete/:id", deleteCategoryController)
 
 export default categoryRoute
