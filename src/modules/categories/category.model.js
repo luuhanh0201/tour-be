@@ -1,7 +1,6 @@
 import { poolConnection, query } from "../../config/database.js"
 
 export const getAllCategoryModel = async ({ page = 1, limit = 10, q = "" } = {}) => {
-  console.log("MODEL CALLED WITH:", { page, limit, q });
 
   page = Math.max(1, parseInt(page || 1, 10));
   limit = Math.min(100, Math.max(1, parseInt(limit || 10, 10)));
