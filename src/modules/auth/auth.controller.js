@@ -17,6 +17,7 @@ export const signIn = async (req, res, next) => {
             return validationErrorResponse(res, errors, 400)
         }
         const user = await signInService(body)
+        delete user.passwordHash
         const { id } = user
         if (!user.isBlock) {
             return errorResponse(res, "Tài khoản đã bị khoá, vui lòng liên hệ với admin để biết thêm thông tin", null, 400)
@@ -29,7 +30,7 @@ export const signIn = async (req, res, next) => {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             sameSite: "lax",
-            secure: false,         
+            secure: true,
             path: "/api/auth/refresh-token",
             maxAge: REFRESH_DAYS * 24 * 60 * 60 * 1000,
         });
