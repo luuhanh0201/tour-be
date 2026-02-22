@@ -26,7 +26,14 @@ export const signIn = async (req, res, next) => {
         const refreshToKenHash = hashToken(refreshToken)
         const expiresAt = addDays(REFRESH_DAYS);
         await createAccessTokenModel({ userId: id, refreshToKenHash: refreshToKenHash, expiresAt: expiresAt, ip, userAgent })
-        return successResponse(res, "Đăng nhập thành công", { user, accessToken, refreshToken }, 200)
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false,         
+            path: "/api/auth/refresh-token",
+            maxAge: REFRESH_DAYS * 24 * 60 * 60 * 1000,
+        });
+        return successResponse(res, "Đăng nhập thành công", { user, accessToken }, 200)
     } catch (error) {
         next(error)
     }
