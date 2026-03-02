@@ -5,12 +5,12 @@ export const findAllServiceModel = async ({ page = 1, limit = 10, q = "" } = {})
     page = Math.max(1, parseInt(page || 1, 10));
     limit = Math.min(100, Math.max(1, parseInt(limit || 10, 10)));
     const offset = (page - 1) * limit;
-
+    console.log(123)
     const keyword = `%${q}%`;
     const where = q ? `WHERE service_name LIKE ? OR service_type LIKE ?` : "";
 
     const sqlData = `
-        SELECT * FROM tour_services
+        SELECT ts.*, t.name as tourName FROM tour_services ts INNER JOIN tours t ON ts.tour_id = t.id
         ${where}
         ORDER BY id DESC
         LIMIT ? OFFSET ?

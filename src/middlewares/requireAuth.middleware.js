@@ -23,7 +23,7 @@ export const requireAdmin = async (req, res, next) => {
         if (role !== "admin") {
             const error = new Error("Bạn không có quyền thực hiện hành động này.")
             error.name = "ROLE_ERROR"
-            error.status = 400
+            error.status = 403
             throw error
         }
         next()

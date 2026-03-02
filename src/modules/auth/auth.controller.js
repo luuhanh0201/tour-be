@@ -19,9 +19,6 @@ export const signIn = async (req, res, next) => {
         const user = await signInService(body)
         delete user.passwordHash
         const { id } = user
-        if (!user.isBlock) {
-            return errorResponse(res, "Tài khoản đã bị khoá, vui lòng liên hệ với admin để biết thêm thông tin", null, 400)
-        }
         const accessToken = signAccessToken({ id: user.id, username: user.username, role: user.role })
         const refreshToken = signRefreshToken({ id: user.id })
         const refreshToKenHash = hashToken(refreshToken)
@@ -50,6 +47,7 @@ export const signUp = async (req, res, next) => {
 
         return successResponse(res, "Đăng ký tài khoản thành công", user, 200)
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

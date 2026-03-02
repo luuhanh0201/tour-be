@@ -8,7 +8,7 @@ export const getAllServiceController = async (req, res, next) => {
     try {
         const { errors } = validatePayload(queryValid, req.body)
         if (errors) return validationErrorResponse(res, errors, 400)
-        const tourServices = await findAllServiceService(req.body)
+        const tourServices = await findAllServiceService(req.query)
         return successResponse(res, "Danh sách dịch vụ", tourServices, 200)
     } catch (error) {
         next()
@@ -27,6 +27,7 @@ export const createServiceController = async (req, res, next) => {
 export const updateServiceController = async (req, res, next) => {
     try {
         const id = req.params.id
+        // console.log(payload)
         const { errors, value } = validatePayload(serviceValid, req.body)
         const payload = { id, ...value }
         if (errors) return validationErrorResponse(res, errors, 409)

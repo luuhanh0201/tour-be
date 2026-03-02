@@ -6,9 +6,11 @@ import tourRoute from "../modules/tours/tour.route.js";
 import serviceRoute from "../modules/tourService/service.route.js";
 import customerRoute from "../modules/customers/customer.route.js";
 import tourDeparture from "../modules/tourDepartures/tourDepartures.route.js";
+import { requiredAuth } from "../middlewares/requireAuth.middleware.js";
 const router = Router()
 
 router.use("/auth", authRoute)
+router.use(requiredAuth)
 router.use("/category", categoryRoute)
 router.use("/service", serviceRoute)
 router.use("/tour", tourRoute)

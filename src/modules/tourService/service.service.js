@@ -21,8 +21,8 @@ export const createServiceService = async (payload = {}) => {
 export const updateServiceService = async (payload = {}) => {
     const { id, tourId, serviceType, serviceName, contactInfo, address, description } = payload
 
-    const { exists } = await findServiceByNameModel({ serviceName })
-    if (exists) {
+    const { exists, service: dataService } = await findServiceByNameModel({ serviceName })
+    if (exists && Number(id) !== dataService.id) {
         const error = new Error("Dịch vụ này đã tồn tại, vui lòng kiểm tra lại.")
         error.name = "SERVICE_ERROR"
         error.status = 409

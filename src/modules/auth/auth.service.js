@@ -34,6 +34,12 @@ export const signInService = async (payload) => {
         error.status = 401;
         throw error
     }
+    if (user.isBlock) {
+        const error = new Error("Tài khoản đã bị khoá, vui lòng liên hệ với admin để biết thêm thông tin.")
+        error.name = "ACCOUNT_ERROR"
+        error.status = 400;
+        throw error
+    }
     const { password_hash: _pw, ...safeUser } = user
     return safeUser
 }
