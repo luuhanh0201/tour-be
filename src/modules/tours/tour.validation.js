@@ -1,6 +1,7 @@
 import Joi from "joi";
 
 export const tourValid = Joi.object({
+    code: Joi.string().trim().max(255).allow("", null),
     name: Joi.string().trim().max(255).required().messages({
         "any.required": "Không thể bỏ trống dòng này."
     }),
@@ -34,6 +35,7 @@ export const tourValid = Joi.object({
 
 })
 export const itinerariesValid = Joi.object({
+
     dayNumber: Joi.number().integer().min(1).required().messages({
         "number.base": "Số ngày không hợp lệ",
         "number.integer": "Số ngày không hợp lệ",

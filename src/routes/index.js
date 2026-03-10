@@ -10,7 +10,7 @@ import { requiredAuth } from "../middlewares/requireAuth.middleware.js";
 const router = Router()
 
 router.use("/auth", authRoute)
-router.use(requiredAuth)
+// router.use(requiredAuth)
 router.use("/category", categoryRoute)
 router.use("/service", serviceRoute)
 router.use("/tour", tourRoute)

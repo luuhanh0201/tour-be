@@ -11,7 +11,7 @@ userRoute.put("/update/me", requiredAuth, guideUpdateProfileController)
 
 
 // Route admin
-userRoute.use(requiredAuth, requireAdmin)
+// userRoute.use(requiredAuth, requireAdmin)
 userRoute.get("/", findAllUserController)
 userRoute.get("/:id", findUserByIdController)
 userRoute.put("/:id", adminUpdateUserController)

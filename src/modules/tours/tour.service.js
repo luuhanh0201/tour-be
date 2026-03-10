@@ -30,7 +30,7 @@ export const addNewTourService = async (payload = {}) => {
     }
     const newPayload = { code: randomCode, ...payload }
     console.log(newPayload)
-    const newTour = insertTourWithItinerariesModel(newPayload);
+    const newTour = await insertTourWithItinerariesModel(newPayload);
     return newTour || null
 
 }

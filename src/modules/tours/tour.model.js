@@ -10,7 +10,7 @@ export const findAllTourModel = async ({ q = "", limit = 10, page = 1 } = {}) =>
 
     const where = q ? `WHERE code LIKE ?  OR name LIKE ?` : ""
 
-    const sqlData = `SELECT * FROM tours ${where} ORDER BY id DESC LIMIT ? OFFSET ?`
+    const sqlData = `SELECT t.*,c.name as category_name FROM tours t INNER JOIN categories c ON t.category_id = c.id ${where} ORDER BY id DESC LIMIT ? OFFSET ?`
     const params = q ? [keyword, keyword, limit, offset] : [limit, offset]
 
     const [rows] = await query(sqlData, params)
@@ -92,7 +92,7 @@ export const insertTourWithItinerariesModel = async (payload = {}) => {
     try {
         await conn.beginTransaction();
         const { code, name, categoryId, durationDays, durationNights, description, highlights, basePrice, status, itineraries = [] } = payload
-        const sqlTour = "INSERT INTO tours (departure_code,name,category_id, duration_days,duration_nights,description,highlights,base_price,status) VALUES (?,?,?,?,?,?,?,?,?)"
+        const sqlTour = "INSERT INTO tours (code,name,category_id, duration_days,duration_nights,description,highlights,base_price,status) VALUES (?,?,?,?,?,?,?,?,?)"
         const paramsTour = [code, name, categoryId, durationDays, durationNights, description, highlights, basePrice, status]
         const [insertTour] = await conn.query(sqlTour, paramsTour)
 

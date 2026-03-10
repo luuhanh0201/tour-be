@@ -20,9 +20,22 @@ export const findAllTourController = async (req, res, next) => {
 export const addNewTourController = async (req, res, next) => {
     try {
         const { itineraries, ...payload } = req.body
-        const { errors, value } = validatePayload(tourValid, payload)
-        if (errors) return validationErrorResponse(res, errors, 400)
-        const newTour = await addNewTourService(req.body)
+        const { errors: tourErrors, value: tourValue } = validatePayload(tourValid, payload)
+        if (tourErrors) return validationErrorResponse(res, tourErrors, 400)
+        // const { errors: itineraryErrors, value: itineraryValue } = validatePayload(itinerariesValid, itineraries)
+
+        if (itineraries && Array.isArray(itineraries) && itineraries.length > 0) {
+            itineraries.forEach((itinerary, index) => {
+                const { errors: itineraryErrors } = validatePayload(itinerariesValid, itinerary)
+                if (itineraryErrors) return validationErrorResponse(res, itineraryErrors, 400)
+            })
+        }
+        console.log(123)
+
+        const value = { ...tourValue, itineraries: itineraries }
+
+        console.log("RESULT VALUE: ", value)
+        const newTour = await addNewTourService(value)
         return successResponse(res, "Tạo tour mới thành công", newTour, 200)
 
     } catch (error) {
@@ -41,9 +54,18 @@ export const findTourByIdController = async (req, res, next) => {
 export const updateTourController = async (req, res, next) => {
     try {
         const { tourId } = req.params
-        const { categoryName, id, createdAt, updatedAt, code, ...tour } = await findTourByIdService({ tourId })
+        const { categoryName, id, createdAt, updatedAt, code, itineraries, ...tour } = await findTourByIdService({ tourId })
         const payload = req.body
-        const newTour = { ...tour, ...payload }
+        const newTour = {
+            name: payload.name || tour.tour.name,
+            categoryId: payload.categoryId || tour.tour.categoryId,
+            durationDays: payload.durationDays || tour.tour.durationDays,
+            durationNights: payload.durationNights || tour.tour.durationNights,
+            description: payload.description || tour.tour.description,
+            highlights: payload.highlights || tour.tour.highlights,
+            basePrice: payload.basePrice || tour.tour.basePrice,
+            status: payload.status || tour.tour.status,
+        };
         const { errors, value } = validatePayload(tourValid, newTour)
         if (errors) return validationErrorResponse(res, errors, 400)
         const tourUpdated = await updateTourService({ tourId, ...value })
